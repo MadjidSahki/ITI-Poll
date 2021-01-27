@@ -27,4 +27,22 @@ describe('workspace-project App', () => {
     expect(await page.email()).toEqual(email);
   });
 
+  it('should log in', async() =>{
+    // create user
+    await page.navigateToSignUp();
+    const email = `test-${randomString()}@e2e.fr`;
+    const nickname = `e2e-${randomString()}`;
+    const password = 'validpassword';
+
+    await page.fillSignUpForm(email, nickname, password)
+    await page.signUp();
+    await page.navigateTo();
+    //log in 
+    await page.navigateTo();
+    await page.fillLogIn(email, password);
+    await page.logIn();
+    expect(await page.email()).toEqual(email);
+
+  })
+
 });

@@ -45,5 +45,17 @@ namespace ITI.Poll.Model.Tests.Unit
         }
 
         static Poll CreateSut() => new Poll(1234, 4321, "Question?", false);
+
+        [Test]
+        public void add_guest_to_poll()
+        {
+            Poll sut = CreateSut();
+            var proposal = sut.AddProposal("Proposal");
+            sut.AddGuest(1234, proposal);
+
+            sut.Guests.Should().HaveCount(1);
+        }
     }
+
+
 }

@@ -32,5 +32,7 @@ namespace ITI.Poll.Infrastructure.Tests.Integration
                 await TestHelpers.UserService.DeleteUser(pollContext, sut, pollRepository, foundUser.Value.UserId);
             }
         }
+
+       
     }
 }

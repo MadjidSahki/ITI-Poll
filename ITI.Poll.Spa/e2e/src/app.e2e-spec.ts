@@ -36,7 +36,7 @@ describe('workspace-project App', () => {
 
     await page.fillSignUpForm(email, nickname, password)
     await page.signUp();
-    await page.navigateTo();
+
     //log in 
     await page.navigateTo();
     await page.fillLogIn(email, password);

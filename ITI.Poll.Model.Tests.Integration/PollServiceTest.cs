@@ -17,41 +17,21 @@ namespace ITI.Poll.Model.Tests.Integration
         {
             using (PollContext pollContext = TestHelpers.CreatePollContext())
             {
-
                 PollContextAccessor pollContextAccessor = new PollContextAccessor(pollContext);
-                var pollRepository = new PollRepository(pollContextAccessor);
-                var userRepository = new UserRepository(pollContextAccessor);
+                PollRepository pollRepository = new PollRepository(pollContextAccessor);
+                UserRepository userRepository = new UserRepository(pollContextAccessor);
 
-
-                string email = $"test-{Guid.NewGuid()}@test.fr";
-                string nickname = $"Test-{Guid.NewGuid()}";
-
-                Result<User> user = await TestHelpers.UserService.CreateUser(userRepository, email, nickname, "validpassword");
-                Result<User> guest = await TestHelpers.UserService.CreateUser(userRepository, $"{email}-guest", $"{nickname}-guest", "validpassword");
-                var pollDto = new NewPollDto
+                NewPollDto newPollDto = new NewPollDto
                 {
-                    AuthorId = user.Value.UserId,
-                    Question = "Test-Question ",
-                    GuestNicknames = new[] { guest.Value.Nickname },
-                    Proposals = new[] { "proposal1", "proposal2" }
+                    AuthorId = 0,
+                    Question = "Question?",
                 };
-                var pollCreated = await TestHelpers.PollService.CreatePoll(pollContext, pollRepository, userRepository, pollDto);
+                PollService sut = new PollService();
 
-                pollCreated.IsSuccess.Should().BeTrue();
-                pollCreated.Value.Guests.Should().HaveCount(pollDto.GuestNicknames.Length);
-                pollCreated.Value.Proposals.Should().HaveCount(pollDto.Proposals.Length);
-                pollCreated.Value.AuthorId.Should().Be(pollDto.AuthorId);
-                pollCreated.Value.Question.Should().Be(pollDto.Question);
+                Result<Poll> poll = await sut.CreatePoll(pollContext, pollRepository, userRepository, newPollDto);
 
-                var poll = await TestHelpers.PollService.FindById(pollRepository, pollCreated.Value.PollId);
-                poll.IsSuccess.Should().BeTrue();
-
-                await TestHelpers.PollService.DeletePoll(pollContext, pollRepository, pollCreated.Value.PollId);
-                await TestHelpers.UserService.DeleteUser(pollContext, userRepository, pollRepository, user.Value.UserId);
-                await TestHelpers.UserService.DeleteUser(pollContext, userRepository, pollRepository, guest.Value.UserId);
-
-
-
+                Result<Poll> expected = Result.CreateSuccess(new Poll(0, 0, "Question?", false));
+                poll.Should().BeEquivalentTo(expected);
             }
         }
     }

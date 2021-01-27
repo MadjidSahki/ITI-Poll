@@ -54,5 +54,41 @@ namespace ITI.Poll.Infrastructure.Tests.Integration
 
             }
         }
+
+        [Test]
+        public async Task remove_guest()
+        {
+            using (PollContext pollContext = TestHelpers.CreatePollContext())
+            {
+
+                PollContextAccessor pollContextAccessor = new PollContextAccessor(pollContext);
+                var pollRepository = new PollRepository(pollContextAccessor);
+                var userRepository = new UserRepository(pollContextAccessor);
+
+
+                string email = $"test-{Guid.NewGuid()}@test.fr";
+                string nickname = $"Test-{Guid.NewGuid()}";
+
+                Result<User> user = await TestHelpers.UserService.CreateUser(userRepository, email, nickname, "validpassword");
+                Result<User> guest2 = await TestHelpers.UserService.CreateUser(userRepository, $"{email}-guest2", $"{nickname}-guest2", "validpassword");
+                Result<User> guest = await TestHelpers.UserService.CreateUser(userRepository, $"{email}-guest", $"{nickname}-guest", "validpassword");
+                var pollDto = new NewPollDto
+                {
+                    AuthorId = user.Value.UserId,
+                    Question = "Test-Question ",
+                    GuestNicknames = new[] { guest.Value.Nickname, guest2.Value.Nickname },
+                    Proposals = new[] { "proposal1", "proposal2" },
+                };
+                var pollCreated = await TestHelpers.PollService.CreatePoll(pollContext, pollRepository, userRepository, pollDto);
+
+                var remove_guest = await TestHelpers.PollService.DeleteGuest(pollRepository,guest2.Value.UserId, pollCreated.Value.PollId);
+
+                await TestHelpers.PollService.DeletePoll(pollContext, pollRepository, pollCreated.Value.PollId);
+                await TestHelpers.UserService.DeleteUser(pollContext, userRepository, pollRepository, user.Value.UserId);
+                await TestHelpers.UserService.DeleteUser(pollContext, userRepository, pollRepository, guest.Value.UserId);
+                await TestHelpers.UserService.DeleteUser(pollContext, userRepository, pollRepository, guest2.Value.UserId);
+            }
+        }
+
     }
 }

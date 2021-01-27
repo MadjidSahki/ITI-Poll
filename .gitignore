@@ -338,3 +338,10 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+ITI.Poll.DB/appsettings.json
+
+ITI.Poll.GraphQL/appsettings.json
+
+ITI.Poll.Infrastructure.Tests.Integration/appsettings.json
+
+ITI.Poll.Model.Tests.Integration/appsettings.json
